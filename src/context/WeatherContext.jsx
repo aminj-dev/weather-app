@@ -1,4 +1,5 @@
-import { createContext, useContext, useState } from "react";
+import axios from "axios";
+import { createContext, useContext, useEffect, useReducer } from "react";
 import {
   WiDaySunny,
   WiCloudy,
@@ -27,18 +28,69 @@ export const weatherIcons = {
 };
 
 export const WeatherContext = createContext();
+const apiKey = import.meta.env.VITE_API_KEY;
+const baseUrl = import.meta.env.VITE_API_BASE;
+
+const initialState = {
+  data: null,
+  loading: false,
+  error: null,
+  city: "Tehran",
+};
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "start":
+      return { ...state, loading: true, error: null };
+    case "success":
+      return {
+        ...state,
+        data: action.payload.weatherData,
+        loading: false,
+        error: null,
+      };
+    case "error":
+      return { ...state, loading: false, error: action.payload.error };
+    default:
+      return state;
+  }
+};
 
 export const WeatherContextProvider = ({ children }) => {
-  const [weatherData, setWeatherData] = useState({
-    icon: {},
-    temp: "",
-    name: "",
-    humidity: "",
-    windSpeed: "",
-  });
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  const fetchApi = async () => {
+    dispatch({ type: "start" });
+    try {
+      const res = await axios.get(
+        `${baseUrl}weather?q=Tehran&appid=${apiKey}&units=metric`
+      );
+      const shaped = await res.data;
+      const shapedObject = {
+        temp: shaped.main.temp,
+        city: shaped.name,
+        humidity: shaped.main.humidity,
+        weather: shaped.weather.main,
+        description: shaped.weather.description,
+        windSpeed: shaped.wind.speed,
+      };
+      dispatch({ type: "success", payload: { weatherData: shapedObject } });
+      console.log(shaped);
+    } catch (error) {
+      dispatch({ type: "error", payload: { error: error } });
+    }
+  };
+
+  useEffect(() => {
+    fetchApi();
+  }, []);
+
+  useEffect(() => {
+    console.log(state.data)
+  }, [state.data])
 
   return (
-    <WeatherContext.Provider value={{ weatherIcons }}>
+    <WeatherContext.Provider value={{ weatherIcons, state, dispatch }}>
       {children}
     </WeatherContext.Provider>
   );
