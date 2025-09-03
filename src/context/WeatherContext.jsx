@@ -30,7 +30,7 @@ export const weatherIcons = {
 export const WeatherContext = createContext();
 const apiKey = import.meta.env.VITE_API_KEY;
 const baseUrl = import.meta.env.VITE_API_BASE;
-
+const url = `${baseUrl}weather?q=Tehran&appid=${apiKey}&units=metric`;
 const initialState = {
   data: null,
   loading: false,
@@ -62,9 +62,7 @@ export const WeatherContextProvider = ({ children }) => {
   const fetchApi = async () => {
     dispatch({ type: "start" });
     try {
-      const res = await axios.get(
-        `${baseUrl}weather?q=Tehran&appid=${apiKey}&units=metric`
-      );
+      const res = await axios.get(url);
       const shaped = await res.data;
       const shapedObject = {
         temp: shaped.main.temp,
@@ -75,7 +73,7 @@ export const WeatherContextProvider = ({ children }) => {
         windSpeed: shaped.wind.speed,
       };
       dispatch({ type: "success", payload: { weatherData: shapedObject } });
-      console.log(shaped);
+      console.log(shapedObject);
     } catch (error) {
       dispatch({ type: "error", payload: { error: error } });
     }
