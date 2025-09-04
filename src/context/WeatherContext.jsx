@@ -30,12 +30,17 @@ export const weatherIcons = {
 export const WeatherContext = createContext();
 const apiKey = import.meta.env.VITE_API_KEY;
 const baseUrl = import.meta.env.VITE_API_BASE;
-const url = `${baseUrl}weather?q=Tehran&appid=${apiKey}&units=metric`;
 const initialState = {
-  data: null,
+  data: {
+        temp: 21,
+        city: "Tehran",
+        humidity: 21,
+        weather: clear,
+        description: clear,
+        windSpeed: 3.01,
+      },
   loading: false,
   error: null,
-  city: "Tehran",
 };
 
 const reducer = (state, action) => {
@@ -59,10 +64,10 @@ const reducer = (state, action) => {
 export const WeatherContextProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const fetchApi = async () => {
+  const fetchApi = async (city) => {
     dispatch({ type: "start" });
     try {
-      const res = await axios.get(url);
+      const res = await axios.get(`${baseUrl}weather?q=${city}&appid=${apiKey}&units=metric`);
       const shaped = await res.data;
       const shapedObject = {
         temp: shaped.main.temp,
@@ -88,7 +93,7 @@ export const WeatherContextProvider = ({ children }) => {
   }, [state.data])
 
   return (
-    <WeatherContext.Provider value={{ weatherIcons, state, dispatch }}>
+    <WeatherContext.Provider value={{ weatherIcons, state, dispatch, fetchApi }}>
       {children}
     </WeatherContext.Provider>
   );
