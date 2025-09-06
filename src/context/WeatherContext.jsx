@@ -35,8 +35,8 @@ const initialState = {
         temp: 21,
         city: "Tehran",
         humidity: 21,
-        weather: clear,
-        description: clear,
+        weather: "clear",
+        description: "clear",
         windSpeed: 3.01,
       },
   loading: false,
@@ -73,8 +73,8 @@ export const WeatherContextProvider = ({ children }) => {
         temp: shaped.main.temp,
         city: shaped.name,
         humidity: shaped.main.humidity,
-        weather: shaped.weather.main,
-        description: shaped.weather.description,
+        weather: shaped.weather[0].main,
+        description: shaped.weather[0   ].description,
         windSpeed: shaped.wind.speed,
       };
       dispatch({ type: "success", payload: { weatherData: shapedObject } });
@@ -85,7 +85,7 @@ export const WeatherContextProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    fetchApi();
+    fetchApi("Tehran");
   }, []);
 
   useEffect(() => {
